@@ -1,0 +1,22 @@
+1<?xml version="1.0" encoding="utf-8"?>
+2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+3    package="com.shounakmulay.telephony" >
+4
+5    <uses-sdk
+6        android:minSdkVersion="23"
+6-->C:\Users\shaur\AppData\Local\Pub\Cache\hosted\pub.dartlang.org\telephony-0.2.0\android\src\main\AndroidManifest.xml
+7        android:targetSdkVersion="23" />
+7-->C:\Users\shaur\AppData\Local\Pub\Cache\hosted\pub.dartlang.org\telephony-0.2.0\android\src\main\AndroidManifest.xml
+8
+9    <uses-permission android:name="android.permission.RECEIVE_SMS" />
+9-->C:\Users\shaur\AppData\Local\Pub\Cache\hosted\pub.dartlang.org\telephony-0.2.0\android\src\main\AndroidManifest.xml:4:5-69
+9-->C:\Users\shaur\AppData\Local\Pub\Cache\hosted\pub.dartlang.org\telephony-0.2.0\android\src\main\AndroidManifest.xml:4:22-67
+10    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+10-->C:\Users\shaur\AppData\Local\Pub\Cache\hosted\pub.dartlang.org\telephony-0.2.0\android\src\main\AndroidManifest.xml:6:5-81
+10-->C:\Users\shaur\AppData\Local\Pub\Cache\hosted\pub.dartlang.org\telephony-0.2.0\android\src\main\AndroidManifest.xml:6:22-78
+11
+12    <application>
+12-->C:\Users\shaur\AppData\Local\Pub\Cache\hosted\pub.dartlang.org\telephony-0.2.0\android\src\main\AndroidManifest.xml:8:5-10:15
+13    </application>
+14
+15</manifest>

@@ -1,0 +1,35 @@
+-- Merging decision tree log ---
+manifest
+ADDED from C:\Users\shaur\AppData\Local\Pub\Cache\hosted\pub.dartlang.org\telephony-0.2.0\android\src\main\AndroidManifest.xml:1:1-11:12
+INJECTED from C:\Users\shaur\AppData\Local\Pub\Cache\hosted\pub.dartlang.org\telephony-0.2.0\android\src\main\AndroidManifest.xml:1:1-11:12
+INJECTED from C:\Users\shaur\AppData\Local\Pub\Cache\hosted\pub.dartlang.org\telephony-0.2.0\android\src\main\AndroidManifest.xml:1:1-11:12
+	package
+		ADDED from C:\Users\shaur\AppData\Local\Pub\Cache\hosted\pub.dartlang.org\telephony-0.2.0\android\src\main\AndroidManifest.xml:1:11-47
+		INJECTED from C:\Users\shaur\AppData\Local\Pub\Cache\hosted\pub.dartlang.org\telephony-0.2.0\android\src\main\AndroidManifest.xml
+		INJECTED from C:\Users\shaur\AppData\Local\Pub\Cache\hosted\pub.dartlang.org\telephony-0.2.0\android\src\main\AndroidManifest.xml
+	xmlns:android
+		ADDED from C:\Users\shaur\AppData\Local\Pub\Cache\hosted\pub.dartlang.org\telephony-0.2.0\android\src\main\AndroidManifest.xml:2:5-63
+uses-permission#android.permission.RECEIVE_SMS
+ADDED from C:\Users\shaur\AppData\Local\Pub\Cache\hosted\pub.dartlang.org\telephony-0.2.0\android\src\main\AndroidManifest.xml:4:5-69
+	android:name
+		ADDED from C:\Users\shaur\AppData\Local\Pub\Cache\hosted\pub.dartlang.org\telephony-0.2.0\android\src\main\AndroidManifest.xml:4:22-67
+uses-permission#android.permission.ACCESS_COARSE_LOCATION
+ADDED from C:\Users\shaur\AppData\Local\Pub\Cache\hosted\pub.dartlang.org\telephony-0.2.0\android\src\main\AndroidManifest.xml:6:5-81
+	android:name
+		ADDED from C:\Users\shaur\AppData\Local\Pub\Cache\hosted\pub.dartlang.org\telephony-0.2.0\android\src\main\AndroidManifest.xml:6:22-78
+application
+ADDED from C:\Users\shaur\AppData\Local\Pub\Cache\hosted\pub.dartlang.org\telephony-0.2.0\android\src\main\AndroidManifest.xml:8:5-10:15
+uses-sdk
+INJECTED from C:\Users\shaur\AppData\Local\Pub\Cache\hosted\pub.dartlang.org\telephony-0.2.0\android\src\main\AndroidManifest.xml reason: use-sdk injection requested
+INJECTED from C:\Users\shaur\AppData\Local\Pub\Cache\hosted\pub.dartlang.org\telephony-0.2.0\android\src\main\AndroidManifest.xml
+INJECTED from C:\Users\shaur\AppData\Local\Pub\Cache\hosted\pub.dartlang.org\telephony-0.2.0\android\src\main\AndroidManifest.xml
+INJECTED from C:\Users\shaur\AppData\Local\Pub\Cache\hosted\pub.dartlang.org\telephony-0.2.0\android\src\main\AndroidManifest.xml
+INJECTED from C:\Users\shaur\AppData\Local\Pub\Cache\hosted\pub.dartlang.org\telephony-0.2.0\android\src\main\AndroidManifest.xml
+	android:targetSdkVersion
+		INJECTED from C:\Users\shaur\AppData\Local\Pub\Cache\hosted\pub.dartlang.org\telephony-0.2.0\android\src\main\AndroidManifest.xml
+		ADDED from C:\Users\shaur\AppData\Local\Pub\Cache\hosted\pub.dartlang.org\telephony-0.2.0\android\src\main\AndroidManifest.xml
+		INJECTED from C:\Users\shaur\AppData\Local\Pub\Cache\hosted\pub.dartlang.org\telephony-0.2.0\android\src\main\AndroidManifest.xml
+	android:minSdkVersion
+		INJECTED from C:\Users\shaur\AppData\Local\Pub\Cache\hosted\pub.dartlang.org\telephony-0.2.0\android\src\main\AndroidManifest.xml
+		ADDED from C:\Users\shaur\AppData\Local\Pub\Cache\hosted\pub.dartlang.org\telephony-0.2.0\android\src\main\AndroidManifest.xml
+		INJECTED from C:\Users\shaur\AppData\Local\Pub\Cache\hosted\pub.dartlang.org\telephony-0.2.0\android\src\main\AndroidManifest.xml

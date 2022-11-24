@@ -1,0 +1,97 @@
+1<?xml version="1.0" encoding="utf-8"?>
+2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+3    package="com.example.myapp"
+4    android:versionCode="1"
+5    android:versionName="1.0.0" >
+6
+7    <uses-sdk
+8        android:minSdkVersion="23"
+9        android:targetSdkVersion="31" />
+10    <!--
+11         The INTERNET permission is required for development. Specifically,
+12         the Flutter tool needs it to communicate with the running application
+13         to allow setting breakpoints, to provide hot reload, etc.
+14    -->
+15    <uses-permission android:name="android.permission.INTERNET" />
+15-->C:\Users\shaur\StudioProjects\myapp\android\app\src\debug\AndroidManifest.xml:7:5-66
+15-->C:\Users\shaur\StudioProjects\myapp\android\app\src\debug\AndroidManifest.xml:7:22-64
+16    <uses-permission android:name="android.permission.RECEIVE_SMS" />
+16-->C:\Users\shaur\StudioProjects\myapp\android\app\src\main\AndroidManifest.xml:3:5-69
+16-->C:\Users\shaur\StudioProjects\myapp\android\app\src\main\AndroidManifest.xml:3:22-67
+17    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+17-->[:telephony] C:\Users\shaur\StudioProjects\myapp\build\telephony\intermediates\merged_manifest\debug\AndroidManifest.xml:10:5-81
+17-->[:telephony] C:\Users\shaur\StudioProjects\myapp\build\telephony\intermediates\merged_manifest\debug\AndroidManifest.xml:10:22-78
+18
+19    <application
+20        android:name="android.app.Application"
+21        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
+21-->[androidx.core:core:1.6.0] C:\Users\shaur\.gradle\caches\transforms-3\acbce933e4b464a5224ed377a62db1f5\transformed\core-1.6.0\AndroidManifest.xml:24:18-86
+22        android:debuggable="true"
+23        android:extractNativeLibs="false"
+24        android:icon="@mipmap/ic_launcher"
+25        android:label="myapp" >
+26        <activity
+27            android:name="com.example.myapp.MainActivity"
+28            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
+29            android:exported="true"
+30            android:hardwareAccelerated="true"
+31            android:launchMode="singleTop"
+32            android:theme="@style/LaunchTheme"
+33            android:windowSoftInputMode="adjustResize" >
+34
+35            <!--
+36                 Specifies an Android theme to apply to this Activity as soon as
+37                 the Android process has started. This theme is visible to the user
+38                 while the Flutter UI initializes. After that, this theme continues
+39                 to determine the Window background behind the Flutter UI.
+40            -->
+41            <meta-data
+42                android:name="io.flutter.embedding.android.NormalTheme"
+43                android:resource="@style/NormalTheme" />
+44
+45            <intent-filter>
+46                <action android:name="android.intent.action.MAIN" />
+47
+48                <category android:name="android.intent.category.LAUNCHER" />
+49            </intent-filter>
+50        </activity>
+51        <!--
+52             Don't delete the meta-data below.
+53             This is used by the Flutter tool to generate GeneratedPluginRegistrant.java
+54        -->
+55
+56
+57        <!-- <receiver android:name="com.shounakmulay.telephony.sms.IncomingSmsReceiver" -->
+58        <!-- android:permission="android.permission.BROADCAST_SMS" android:exported="true"> -->
+59        <!-- <intent-filter> -->
+60        <!-- <action android:name="android.provider.Telephony.SMS_RECEIVED"/> -->
+61        <!-- </intent-filter> -->
+62        <!-- </receiver> -->
+63        <receiver
+64            android:name="com.shounakmulay.telephony.sms.IncomingSmsReceiver"
+65            android:exported="true"
+66            android:permission="android.permission.BROADCAST_SMS" >
+67            <intent-filter>
+68                <action android:name="android.provider.Telephony.SMS_RECEIVED" />
+69            </intent-filter>
+70        </receiver>
+71
+72        <meta-data
+73            android:name="flutterEmbedding"
+74            android:value="2" />
+75
+76        <uses-library
+76-->[androidx.window:window:1.0.0-beta04] C:\Users\shaur\.gradle\caches\transforms-3\49bc944d29f70d45aa5add8e43e3247e\transformed\jetified-window-1.0.0-beta04\AndroidManifest.xml:25:9-27:40
+77            android:name="androidx.window.extensions"
+77-->[androidx.window:window:1.0.0-beta04] C:\Users\shaur\.gradle\caches\transforms-3\49bc944d29f70d45aa5add8e43e3247e\transformed\jetified-window-1.0.0-beta04\AndroidManifest.xml:26:13-54
+78            android:required="false" />
+78-->[androidx.window:window:1.0.0-beta04] C:\Users\shaur\.gradle\caches\transforms-3\49bc944d29f70d45aa5add8e43e3247e\transformed\jetified-window-1.0.0-beta04\AndroidManifest.xml:27:13-37
+79        <uses-library
+79-->[androidx.window:window:1.0.0-beta04] C:\Users\shaur\.gradle\caches\transforms-3\49bc944d29f70d45aa5add8e43e3247e\transformed\jetified-window-1.0.0-beta04\AndroidManifest.xml:28:9-30:40
+80            android:name="androidx.window.sidecar"
+80-->[androidx.window:window:1.0.0-beta04] C:\Users\shaur\.gradle\caches\transforms-3\49bc944d29f70d45aa5add8e43e3247e\transformed\jetified-window-1.0.0-beta04\AndroidManifest.xml:29:13-51
+81            android:required="false" />
+81-->[androidx.window:window:1.0.0-beta04] C:\Users\shaur\.gradle\caches\transforms-3\49bc944d29f70d45aa5add8e43e3247e\transformed\jetified-window-1.0.0-beta04\AndroidManifest.xml:30:13-37
+82    </application>
+83
+84</manifest>

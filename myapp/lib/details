@@ -1,0 +1,114 @@
+List getDetails (String body) {
+    final regex1 = RegExp(r'HDFC|ICICI|SBI');
+    final match = regex1.firstMatch(body);
+    final bank = match?.group(0);
+
+    if (bank == "HDFC") {
+        final regex2 = RegExp(r'[0-3][0-9]-[0-1][1-9]-[2-9][2-9]');
+        final text1 = regex2.firstMatch(body);
+        final String date = text1?.group(0);
+
+        final regex3 = RegExp(r'[a-zA-Z0-9\._-]*@[a-z]*');
+        final text2 = regex3.firstMatch(body);
+        final String upi_id = text2?.group(0);
+
+        final regex4 = RegExp(r'UPI Ref No [0-9]*');
+        final text3 = regex4.firstMatch(body);
+        final String reference_number = text3?.group(0).split(" ").elementAt(3);
+
+        final regex5 = RegExp(r'Rs [0-9]*.[0-9][0-9]');
+        final text4 = regex4.firstMatch(body);
+        final String amount = text4?.group(0).split(" ").elementAt(1);
+
+        final regex6 = RegExp(r'credited|debited');
+        final text5 = regex4.firstMatch(body);
+        final category_payment = text5?.group(0);
+    }
+
+    else if (bank == "SBI") {
+        final regex2 = RegExp(r'[0-3][0-9][A-Z][a-z]*[2-9][2-9]');
+        final text1 = regex2.firstMatch(body);
+        final date = text1?.group(0);
+
+        final regex3 = RegExp(r'[a-zA-Z0-9\._-]*@[a-z]*|[A-Z]* [A-Z]* [A-Z]*');
+        final text2 = regex3.allMatches(body);
+
+        String upi_id;
+        flag = 0;
+        String match;
+
+        Iterable<Match> matches = regex3.allMatches(body, 0);
+        for (final Match m in matches) {
+            match = m[0]!;
+            if (match.contains('@') == true) {
+                flag == 1;
+                break;
+            }
+        }
+
+        if (flag == 1) {
+            upi_id = matches.elementAt(0)[0]!;
+        }
+
+        else {
+            upi_id = matches.elementAt(1)[0]!;
+        }
+
+        final regex4 = RegExp(r'Ref No [0-9]*');
+        final text3 = regex4.firstMatch(body);
+        final String reference_number = text3?.group(0).split(" ").elementAt(2);
+
+        final regex5 = RegExp(r'Rs[0-9]*.[0-9]*');
+        final text4 = regex4.firstMatch(body);
+        final amount = text4?.group(0).split("Rs").elementAt(1);
+
+        final regex6 = RegExp(r'credited|debited');
+        final text5 = regex4.firstMatch(body);
+        final category_payment = text5?.group(0);
+    }
+
+    else if (bank = "ICICI") {
+        final regex2 = RegExp(r'[0-3][0-9][A-Z][a-z]*[2-9][2-9]');
+        final text1 = regex2.firstMatch(body);
+        final date = text1?.group(0);
+
+        final regex3 = RegExp(r'[a-zA-Z0-9\._-]*@[a-z]*|[A-Z]* [A-Z]* [A-Z]*');
+        final text2 = regex3.allMatches(body);
+
+        String upi_id;
+        flag = 0;
+        String match;
+
+        Iterable<Match> matches = regex3.allMatches(body, 0);
+        for (final Match m in matches) {
+            match = m[0]!;
+            if (match.contains('@') == true) {
+                flag == 1;
+                break;
+            }
+        }
+
+        if (flag == 1) {
+            upi_id = matches.elementAt(0)[0]!;
+        }
+
+        else {
+            upi_id = matches.elementAt(1)[0]!;
+        }
+
+        final regex4 = RegExp(r'Ref No [0-9]*');
+        final text3 = regex4.firstMatch(body);
+        final String reference_number = text3?.group(0).split(" ").elementAt(2);
+
+        final regex5 = RegExp(r'Rs[0-9]*.[0-9]*');
+        final text4 = regex4.firstMatch(body);
+        final amount = text4?.group(0).split("Rs").elementAt(1);
+
+        final regex6 = RegExp(r'credited|debited');
+        final text5 = regex4.firstMatch(body);
+        final category_payment = text5?.group(0);
+    }
+
+    return [date, upi_id, reference_number, amount, category_payment];
+
+}
