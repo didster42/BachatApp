@@ -1,6 +1,7 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
 
 import 'package:flutter/material.dart';
+import '../components/sms_module.dart';
 
 class PriceShower extends StatefulWidget {
   const PriceShower({super.key});
@@ -10,6 +11,8 @@ class PriceShower extends StatefulWidget {
 }
 
 class _PriceShowerState extends State<PriceShower> {
+  // final smsModuleInstance = SmsModule();
+
   @override
   Widget build(BuildContext context) {
     return Padding(
