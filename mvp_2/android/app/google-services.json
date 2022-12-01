@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "390376465692",
+    "project_id": "bachat-dfa1d",
+    "storage_bucket": "bachat-dfa1d.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:390376465692:android:12d6ad30d4878bf1ac86d9",
+        "android_client_info": {
+          "package_name": "com.example.mvp_2"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "390376465692-u4gj6048b9i17k1vj2gkitoeq5unvj2f.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAg-rrQT-3Znio51KuiRmWfcSFW3SrvuTI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "390376465692-u4gj6048b9i17k1vj2gkitoeq5unvj2f.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

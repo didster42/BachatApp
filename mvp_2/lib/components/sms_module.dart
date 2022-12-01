@@ -1,6 +1,15 @@
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:telephony/telephony.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'price_shower.dart';
+
+final db = FirebaseFirestore.instance;
+double? monthlyExpenditure;
 
 class SmsModule extends StatefulWidget {
   const SmsModule({super.key});
@@ -12,11 +21,14 @@ class SmsModule extends StatefulWidget {
 class _SmsModuleState extends State<SmsModule> {
   late String _message;
   final telephony = Telephony.instance;
+  final db = FirebaseFirestore.instance;
+  final priceInstance = PriceShower();
 
   onMessage(SmsMessage message) async {
     print("on message called");
     List details = getDetails(message.body ?? "Error");
     String bank, date, upi_id, reference_number, amount, category_payment;
+
     bank = details[0];
     date = details[1];
     upi_id = details[2];
@@ -24,7 +36,50 @@ class _SmsModuleState extends State<SmsModule> {
     amount = details[4];
     category_payment = details[5];
 
-    print(bank + date);
+    double dAmount = double.parse(amount);
+
+    // Firebase database update code
+    final transactionData = <String, dynamic>{
+      'timeOfPayment': DateTime.now().millisecondsSinceEpoch,
+      'bank': bank,
+      'date': date,
+      'upiId': upi_id,
+      'refNum': reference_number,
+      'amountPaid': dAmount,
+      'paymentCategory': category_payment
+    };
+
+    double? currentAmount;
+
+    db
+        .collection('/users')
+        .doc(FirebaseAuth.instance.currentUser?.email)
+        .collection('/expenseList')
+        .doc()
+        .set(transactionData)
+        .then((value) => print("transaction data pushed"))
+        .onError((error, stackTrace) => print("Error: $error"));
+
+    db
+        .collection('/users')
+        .doc(FirebaseAuth.instance.currentUser?.email)
+        .get()
+        .then((DocumentSnapshot snapshot) {
+      final existingData = snapshot.data() as Map<String, dynamic>;
+
+      double currentWeeklyAmount =
+          existingData['weeklyExpenses'].toDouble() + dAmount;
+      double currentMonthlyAmount =
+          existingData['monthlyExpenses'].toDouble() + dAmount;
+
+      db
+          .collection('/users')
+          .doc(FirebaseAuth.instance.currentUser?.email)
+          .update({
+        'weeklyExpenses': currentWeeklyAmount,
+        'monthlyExpenses': currentMonthlyAmount
+      }).then((value) => print("updated new amount"));
+    });
   }
 
   Future<void> initPlatformState() async {
@@ -56,6 +111,7 @@ class _SmsModuleState extends State<SmsModule> {
   @override
   Widget build(BuildContext context) {
     initPlatformState();
+
     //print("inside widget build");
     // return Center(
     //   child: ElevatedButton(
@@ -69,7 +125,9 @@ class _SmsModuleState extends State<SmsModule> {
   }
 }
 
-onBackgroundMessage(SmsMessage message) {
+onBackgroundMessage(SmsMessage message) async {
+  await Firebase.initializeApp();
+
   debugPrint("onBackgroundMessage called");
   List details = getDetails(message.body ?? "Error");
   String bank, date, upi_id, reference_number, amount, category_payment;
@@ -80,7 +138,48 @@ onBackgroundMessage(SmsMessage message) {
   amount = details[4];
   category_payment = details[5];
 
-  print(bank + amount);
+  double dAmount = double.parse(amount);
+
+  // Firebase database update code
+  final transactionData = <String, dynamic>{
+    'timeOfPayment': DateTime.now().millisecondsSinceEpoch,
+    'bank': bank,
+    'date': date,
+    'upiId': upi_id,
+    'refNum': reference_number,
+    'amountPaid': dAmount,
+    'paymentCategory': category_payment
+  };
+
+  db
+      .collection('/users')
+      .doc(FirebaseAuth.instance.currentUser?.email)
+      .collection('/expenseList')
+      .doc()
+      .set(transactionData)
+      .then((value) => print("transaction data pushed"))
+      .onError((error, stackTrace) => print("Error: $error"));
+
+  db
+      .collection('/users')
+      .doc(FirebaseAuth.instance.currentUser?.email)
+      .get()
+      .then((DocumentSnapshot snapshot) {
+    final existingData = snapshot.data() as Map<String, dynamic>;
+
+    double currentWeeklyAmount =
+        existingData['weeklyExpenses'].toDouble() + dAmount;
+    double currentMonthlyAmount =
+        existingData['monthlyExpenses'].toDouble() + dAmount;
+
+    db
+        .collection('/users')
+        .doc(FirebaseAuth.instance.currentUser?.email)
+        .update({
+      'weeklyExpenses': currentWeeklyAmount,
+      'monthlyExpenses': currentMonthlyAmount
+    }).then((value) => print("updated new amount"));
+  });
 }
 
 List getDetails(String body) {

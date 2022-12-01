@@ -30,6 +30,8 @@ environment:
 # versions available, run `flutter pub outdated`.
 dependencies:
 
+  cloud_firestore: ^4.1.0
+  firebase_auth: ^4.1.4
   telephony: ^0.2.0
 
   pie_chart: 5.3.2

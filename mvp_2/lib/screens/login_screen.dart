@@ -1,6 +1,8 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
 
 import 'package:flutter/material.dart';
+import 'package:mvp_2/screens/signup_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -21,18 +23,22 @@ class _LoginScreenState extends State<LoginScreen> {
           width: double.infinity,
           color: Color.fromRGBO(15, 33, 61, 1),
           child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-            Text("Bachat",
-                style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                    fontSize: 40,
-                    letterSpacing: 3.5)),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 40),
+              child: Text("Bachat",
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                      fontSize: 40,
+                      letterSpacing: 3.5)),
+            ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 40),
               child: Column(
                 children: [
                   TextField(
                       controller: emailController,
+                      textInputAction: TextInputAction.next,
                       decoration: InputDecoration(
                           enabledBorder: UnderlineInputBorder(
                             borderSide: BorderSide(color: Colors.grey),
@@ -54,11 +60,18 @@ class _LoginScreenState extends State<LoginScreen> {
                   Row(mainAxisAlignment: MainAxisAlignment.center, children: [
                     Text("Don't have an account?",
                         style: TextStyle(color: Colors.white)),
-                    TextButton(onPressed: () {}, child: Text("Sign up!"))
+                    TextButton(
+                        onPressed: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => const SignupScreen()));
+                        },
+                        child: Text("Sign up!"))
                   ]),
                   SizedBox(height: 15),
                   ElevatedButton(
-                      onPressed: (() {}),
+                      onPressed: SignIn,
                       child: Padding(
                         padding: const EdgeInsets.symmetric(),
                         child: Text("Login"),
@@ -68,5 +81,11 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
           ])),
     );
+  }
+
+  Future SignIn() async {
+    await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: emailController.text.trim(),
+        password: passwordController.text.trim());
   }
 }
