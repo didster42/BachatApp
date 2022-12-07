@@ -9,12 +9,12 @@ class PriceShower extends StatefulWidget {
   const PriceShower({super.key});
 
   @override
-  State<PriceShower> createState() => _PriceShowerState();
+  State<PriceShower> createState() => PriceShowerState();
 }
 
-class _PriceShowerState extends State<PriceShower> {
+class PriceShowerState extends State<PriceShower> {
   final db = FirebaseFirestore.instance;
-  double? monthlyExpenditureValue;
+  static double? monthlyExpenditureValue;
 
   void initState() {
     super.initState();
@@ -29,6 +29,12 @@ class _PriceShowerState extends State<PriceShower> {
       setState(() {
         monthlyExpenditureValue = docData['monthlyExpenses'];
       });
+    });
+  }
+
+  void UpdateState(double valueAfterSms) {
+    setState(() {
+      monthlyExpenditureValue = monthlyExpenditureValue;
     });
   }
 

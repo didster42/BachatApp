@@ -9,7 +9,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'price_shower.dart';
 
 final db = FirebaseFirestore.instance;
-double? monthlyExpenditure;
+double monthlyExpenditure = -1;
 
 class SmsModule extends StatefulWidget {
   const SmsModule({super.key});
@@ -22,7 +22,6 @@ class _SmsModuleState extends State<SmsModule> {
   late String _message;
   final telephony = Telephony.instance;
   final db = FirebaseFirestore.instance;
-  final priceInstance = PriceShower();
 
   onMessage(SmsMessage message) async {
     print("on message called");
@@ -78,7 +77,11 @@ class _SmsModuleState extends State<SmsModule> {
           .update({
         'weeklyExpenses': currentWeeklyAmount,
         'monthlyExpenses': currentMonthlyAmount
-      }).then((value) => print("updated new amount"));
+      }).then((value) {
+        print("Updated new amount");
+
+        PriceShowerState().UpdateState(monthlyExpenditure + dAmount);
+      });
     });
   }
 
