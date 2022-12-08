@@ -32,9 +32,10 @@ class PriceShowerState extends State<PriceShower> {
     });
   }
 
+  @override
   void UpdateState(double valueAfterSms) {
     setState(() {
-      monthlyExpenditureValue = monthlyExpenditureValue;
+      monthlyExpenditureValue = valueAfterSms;
     });
   }
 

@@ -11,17 +11,21 @@ import 'price_shower.dart';
 final db = FirebaseFirestore.instance;
 double monthlyExpenditure = -1;
 
-class SmsModule extends StatefulWidget {
-  const SmsModule({super.key});
+// class SmsModule extends StatefulWidget {
+//   const SmsModule({super.key});
 
-  @override
-  State<SmsModule> createState() => _SmsModuleState();
-}
+//   @override
+//   State<SmsModule> createState() => SmsModuleState();
+// }
 
-class _SmsModuleState extends State<SmsModule> {
+class SmsModuleState extends PriceShowerState {
   late String _message;
   final telephony = Telephony.instance;
   final db = FirebaseFirestore.instance;
+
+  // _SmsModuleState({this.UpdateState(12)});
+
+  // final UpdateCallback UpdateState;
 
   onMessage(SmsMessage message) async {
     print("on message called");
@@ -80,7 +84,7 @@ class _SmsModuleState extends State<SmsModule> {
       }).then((value) {
         print("Updated new amount");
 
-        PriceShowerState().UpdateState(monthlyExpenditure + dAmount);
+        UpdateState(monthlyExpenditure + dAmount);
       });
     });
   }
@@ -294,7 +298,7 @@ List getDetails(String body) {
   print("check");
   // print(bank! +
   //     upi_id! +
-  //     date! +
+  //     date!rz +
   //     " " +
   //     reference_number! +
   //     "   " +
@@ -305,3 +309,5 @@ List getDetails(String body) {
   //print(bank! + "lol");
   return [bank, date, upi_id, reference_number, amount, category_payment];
 }
+
+typedef UpdateCallback = void Function({required double valueAfterSms});

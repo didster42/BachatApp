@@ -27,7 +27,7 @@ class _HomeScreenState extends State<HomeScreen> {
           child: ListView(
             children: [
               PriceShower(),
-              SmsModule(),
+              //SmsModuleState(),
               RecentExpenses(),
               ExpenseAnalysis()
             ],
