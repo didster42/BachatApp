@@ -1,9 +1,12 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
 
 import 'package:flutter/material.dart';
+import 'package:mvp_2/components/set_budget.dart';
 import '../components/sms_module.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+
+ValueNotifier<double> monthlyExpenditureValue = ValueNotifier(-1);
 
 class PriceShower extends StatefulWidget {
   const PriceShower({super.key});
@@ -12,12 +15,13 @@ class PriceShower extends StatefulWidget {
   State<PriceShower> createState() => PriceShowerState();
 }
 
-class PriceShowerState extends State<PriceShower> {
+class PriceShowerState extends State<PriceShower> with WidgetsBindingObserver {
   final db = FirebaseFirestore.instance;
-  static double? monthlyExpenditureValue;
 
   void initState() {
     super.initState();
+
+    WidgetsBinding.instance.addObserver(this);
 
     db
         .collection('/users')
@@ -27,30 +31,33 @@ class PriceShowerState extends State<PriceShower> {
       final docData = snapshot.data() as Map<String, dynamic>;
 
       setState(() {
-        monthlyExpenditureValue = docData['monthlyExpenses'];
+        monthlyExpenditureValue.value = docData['monthlyExpenses'];
       });
     });
   }
 
   @override
-  void UpdateState(double valueAfterSms) {
-    setState(() {
-      monthlyExpenditureValue = valueAfterSms;
-    });
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
   }
 
-  double? getMonthlyExpenditure() {
-    db
-        .collection('/users')
-        .doc(FirebaseAuth.instance.currentUser?.email)
-        .get()
-        .then((DocumentSnapshot snapshot) {
-      final docData = snapshot.data() as Map<String, dynamic>;
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      // making a call to the database when we resume app to update monthly expenses and the like
 
-      monthlyExpenditureValue = docData['monthlyExpenses'];
-    });
+      db
+          .collection('/users')
+          .doc(FirebaseAuth.instance.currentUser?.email)
+          .get()
+          .then((DocumentSnapshot snapshot) {
+        final existingData = snapshot.data() as Map<String, dynamic>;
 
-    return monthlyExpenditureValue;
+        monthlyExpenditureValue.value =
+            existingData['monthlyExpenses'].toDouble();
+      });
+    }
   }
 
   @override
@@ -101,9 +108,10 @@ class PriceShowerState extends State<PriceShower> {
                     width: 200,
                     child: Stack(fit: StackFit.expand, children: [
                       CircularProgressIndicator(
-                          color: Color.fromARGB(230, 255, 255, 255),
+                          color: Color.fromRGBO(255, 255, 255, 0.8),
                           backgroundColor: Color.fromARGB(255, 255, 239, 155),
-                          value: 0.15,
+                          //value: 0.15,
+                          value: 1 - (monthlyExpenditureValue.value / budget),
                           strokeWidth: 10),
                       Center(
                           child: Container(
@@ -121,11 +129,19 @@ class PriceShowerState extends State<PriceShower> {
                                                 color: Colors.white,
                                                 fontSize: 40,
                                                 fontWeight: FontWeight.bold)),
-                                        Text(monthlyExpenditureValue.toString(),
-                                            style: TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 40,
-                                                fontWeight: FontWeight.bold)),
+                                        ValueListenableBuilder(
+                                            valueListenable:
+                                                monthlyExpenditureValue,
+                                            builder: ((context, value, child) {
+                                              return Text(
+                                                  monthlyExpenditureValue.value
+                                                      .toString(),
+                                                  style: TextStyle(
+                                                      color: Colors.white,
+                                                      fontSize: 40,
+                                                      fontWeight:
+                                                          FontWeight.bold));
+                                            }))
                                       ],
                                     ),
                                   ),
@@ -142,8 +158,15 @@ class PriceShowerState extends State<PriceShower> {
               Padding(
                 padding: EdgeInsets.symmetric(vertical: 30),
                 child: Center(
-                  child: Text("Budget - ₹ 7500",
-                      style: TextStyle(color: Colors.white, fontSize: 17)),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text("Budget - ₹ ",
+                          style: TextStyle(color: Colors.white, fontSize: 17)),
+                      Text(budget.toStringAsFixed(0),
+                          style: TextStyle(color: Colors.white, fontSize: 17)),
+                    ],
+                  ),
                 ),
               )
             ],

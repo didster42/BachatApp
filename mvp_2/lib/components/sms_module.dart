@@ -1,30 +1,31 @@
 import 'dart:ffi';
 
 import 'package:flutter/material.dart';
+import 'package:mvp_2/components/expense_analyse.dart';
 import 'dart:async';
 import 'package:telephony/telephony.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'price_shower.dart';
+import '../screens/home_screen.dart';
 
 final db = FirebaseFirestore.instance;
 double monthlyExpenditure = -1;
 
-// class SmsModule extends StatefulWidget {
-//   const SmsModule({super.key});
+class SmsModule extends StatefulWidget {
+  const SmsModule({super.key});
 
-//   @override
-//   State<SmsModule> createState() => SmsModuleState();
-// }
+  @override
+  State<SmsModule> createState() => SmsModuleState();
+}
 
-class SmsModuleState extends PriceShowerState {
+class SmsModuleState extends State<SmsModule> {
   late String _message;
   final telephony = Telephony.instance;
   final db = FirebaseFirestore.instance;
 
   // _SmsModuleState({this.UpdateState(12)});
-
   // final UpdateCallback UpdateState;
 
   onMessage(SmsMessage message) async {
@@ -66,6 +67,43 @@ class SmsModuleState extends PriceShowerState {
     db
         .collection('/users')
         .doc(FirebaseAuth.instance.currentUser?.email)
+        .collection('categoryExpenseList')
+        .doc('food')
+        .get()
+        .then((DocumentSnapshot snapshot) {
+      if (snapshot.exists) {
+        print("The category exists");
+        final existingData = snapshot.data() as Map<String, dynamic>;
+
+        double newTotalAmount =
+            existingData['totalAmount'].toDouble() + dAmount;
+
+        db
+            .collection('/users')
+            .doc(FirebaseAuth.instance.currentUser?.email)
+            .collection('categoryExpenseList')
+            .doc('food')
+            .update({'totalAmount': newTotalAmount}).then((value) {
+          costMapping.value['food'] = newTotalAmount;
+          costMapping.notifyListeners();
+        });
+      } else {
+        db
+            .collection('/users')
+            .doc(FirebaseAuth.instance.currentUser?.email)
+            .collection(('categoryExpenseList'))
+            .doc('food')
+            .set({'totalAmount': dAmount}).then((value) {
+          print("Category payment has been set for the first time");
+          costMapping.value['food'] = dAmount;
+          costMapping.notifyListeners();
+        });
+      }
+    });
+
+    db
+        .collection('/users')
+        .doc(FirebaseAuth.instance.currentUser?.email)
         .get()
         .then((DocumentSnapshot snapshot) {
       final existingData = snapshot.data() as Map<String, dynamic>;
@@ -83,8 +121,7 @@ class SmsModuleState extends PriceShowerState {
         'monthlyExpenses': currentMonthlyAmount
       }).then((value) {
         print("Updated new amount");
-
-        UpdateState(monthlyExpenditure + dAmount);
+        monthlyExpenditureValue.value = currentMonthlyAmount;
       });
     });
   }
@@ -185,7 +222,48 @@ onBackgroundMessage(SmsMessage message) async {
         .update({
       'weeklyExpenses': currentWeeklyAmount,
       'monthlyExpenses': currentMonthlyAmount
-    }).then((value) => print("updated new amount"));
+    }).then((value) {
+      print("updated new amount");
+      print(currentMonthlyAmount);
+      monthlyExpenditureValue.value = currentMonthlyAmount;
+      print(monthlyExpenditureValue.value);
+    });
+  });
+
+  db
+      .collection('/users')
+      .doc(FirebaseAuth.instance.currentUser?.email)
+      .collection('categoryExpenseList')
+      .doc('food')
+      .get()
+      .then((DocumentSnapshot snapshot) {
+    if (snapshot.exists) {
+      print("The category exists");
+      final existingData = snapshot.data() as Map<String, dynamic>;
+
+      double newTotalAmount = existingData['totalAmount'].toDouble() + dAmount;
+
+      db
+          .collection('/users')
+          .doc(FirebaseAuth.instance.currentUser?.email)
+          .collection('categoryExpenseList')
+          .doc('food')
+          .update({'totalAmount': newTotalAmount}).then((value) {
+        costMapping.value['food'] = newTotalAmount;
+        costMapping.notifyListeners();
+      });
+    } else {
+      db
+          .collection('/users')
+          .doc(FirebaseAuth.instance.currentUser?.email)
+          .collection(('categoryExpenseList'))
+          .doc('food')
+          .set({'totalAmount': dAmount}).then((value) {
+        print("Category payment has been set for the first time");
+        costMapping.value['food'] = dAmount;
+        costMapping.notifyListeners();
+      });
+    }
   });
 }
 
