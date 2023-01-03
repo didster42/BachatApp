@@ -17,6 +17,7 @@ class PriceShower extends StatefulWidget {
 
 class PriceShowerState extends State<PriceShower> with WidgetsBindingObserver {
   final db = FirebaseFirestore.instance;
+  String username = "Shaurya";
 
   void initState() {
     super.initState();
@@ -32,6 +33,7 @@ class PriceShowerState extends State<PriceShower> with WidgetsBindingObserver {
 
       setState(() {
         monthlyExpenditureValue.value = docData['monthlyExpenses'];
+        username = docData['name'].toString();
       });
     });
   }
@@ -84,7 +86,7 @@ class PriceShowerState extends State<PriceShower> with WidgetsBindingObserver {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text("Hi Shaurya!",
+                    Text("Hi $username!",
                         style: TextStyle(
                             color: Color.fromARGB(255, 216, 216, 216),
                             fontSize: 17.5,
