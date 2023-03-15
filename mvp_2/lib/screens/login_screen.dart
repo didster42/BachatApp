@@ -16,8 +16,15 @@ class _LoginScreenState extends State<LoginScreen> {
   final passwordController = TextEditingController();
 
   @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       body: Container(
           height: double.infinity,
           width: double.infinity,
@@ -38,6 +45,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 children: [
                   TextField(
                       controller: emailController,
+                      style: TextStyle(color: Colors.white),
                       textInputAction: TextInputAction.next,
                       decoration: InputDecoration(
                           enabledBorder: UnderlineInputBorder(
@@ -49,6 +57,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   SizedBox(height: 25),
                   TextField(
                       controller: passwordController,
+                      style: TextStyle(color: Colors.white),
+                      obscureText: true,
                       decoration: InputDecoration(
                           enabledBorder: UnderlineInputBorder(
                             borderSide: BorderSide(color: Colors.grey),

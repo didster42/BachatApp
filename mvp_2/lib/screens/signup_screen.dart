@@ -20,6 +20,7 @@ class _SignupScreenState extends State<SignupScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       body: Container(
           height: double.infinity,
           width: double.infinity,
@@ -35,36 +36,44 @@ class _SignupScreenState extends State<SignupScreen> {
                       letterSpacing: 3.5)),
             ),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 40),
+              padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 20),
               child: Column(
                 children: [
                   TextFormField(
                       controller: emailController,
+                      style: TextStyle(color: Colors.white),
                       decoration: const InputDecoration(
                           enabledBorder: UnderlineInputBorder(
                             borderSide: BorderSide(color: Colors.grey),
                           ),
                           label: Text("Email",
-                              style: TextStyle(color: Colors.grey)),
+                              style:
+                                  TextStyle(color: Colors.grey, fontSize: 15)),
                           fillColor: Colors.redAccent)),
-                  const SizedBox(height: 25),
+                  const SizedBox(height: 30),
                   TextField(
                       controller: nameController,
+                      style: TextStyle(color: Colors.white),
                       decoration: const InputDecoration(
                           enabledBorder: UnderlineInputBorder(
                             borderSide: BorderSide(color: Colors.grey),
                           ),
                           label: Text("Name",
-                              style: TextStyle(color: Colors.grey)),
+                              style:
+                                  TextStyle(color: Colors.grey, fontSize: 15)),
                           fillColor: Colors.redAccent)),
+                  const SizedBox(height: 30),
                   TextFormField(
                       controller: passwordController,
+                      style: TextStyle(color: Colors.white),
+                      obscureText: true,
                       decoration: const InputDecoration(
                           enabledBorder: UnderlineInputBorder(
                             borderSide: BorderSide(color: Colors.grey),
                           ),
                           label: Text("Password",
-                              style: TextStyle(color: Colors.grey)),
+                              style:
+                                  TextStyle(color: Colors.grey, fontSize: 15)),
                           fillColor: Colors.redAccent)),
                   const SizedBox(height: 25),
                   const SizedBox(height: 25),
@@ -99,8 +108,9 @@ class _SignupScreenState extends State<SignupScreen> {
         .then((value) {
       final user = <String, dynamic>{
         'name': nameController.text.trim(),
-        'monthlyExpenses': 0,
-        'weeklyExpenses': 0
+        'monthlyExpenses': 0.0,
+        'weeklyExpenses': 0.0,
+        'budget': 3000.0
       };
 
       db
@@ -109,6 +119,16 @@ class _SignupScreenState extends State<SignupScreen> {
           .set(user)
           .then(((value) => print("Value written successfully")))
           .onError((error, stackTrace) => print("Error : $error"));
+
+      db
+          .collection('/users')
+          .doc(FirebaseAuth.instance.currentUser?.email)
+          .collection('/categoryExpenseList');
+
+      db
+          .collection('/users')
+          .doc(FirebaseAuth.instance.currentUser?.email)
+          .collection('/expenseList');
     });
   }
 }

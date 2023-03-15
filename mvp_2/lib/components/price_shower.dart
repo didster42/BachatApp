@@ -1,7 +1,7 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
 
 import 'package:flutter/material.dart';
-import 'package:mvp_2/components/set_budget.dart';
+//import 'package:mvp_2/components/set_budget.dart';
 import '../components/sms_module.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -17,7 +17,10 @@ class PriceShower extends StatefulWidget {
 
 class PriceShowerState extends State<PriceShower> with WidgetsBindingObserver {
   final db = FirebaseFirestore.instance;
-  String username = "Shaurya";
+
+  String username = "User";
+
+  double budget = -1;
 
   void initState() {
     super.initState();
@@ -34,6 +37,7 @@ class PriceShowerState extends State<PriceShower> with WidgetsBindingObserver {
       setState(() {
         monthlyExpenditureValue.value = docData['monthlyExpenses'];
         username = docData['name'].toString();
+        budget = docData['budget'];
       });
     });
   }

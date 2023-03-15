@@ -145,26 +145,10 @@ class SmsModuleState extends State<SmsModule> {
     if (!mounted) return;
   }
 
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   initPlatformState();
-  //   print("State initialized");
-  // }
-
   @override
   Widget build(BuildContext context) {
     initPlatformState();
 
-    //print("inside widget build");
-    // return Center(
-    //   child: ElevatedButton(
-    //     onPressed: () {
-    //       initPlatformState();
-    //     },
-    //     child: const Text('Show SnackBar'),
-    //   ),
-    // );
     return SizedBox.shrink();
   }
 }
@@ -374,17 +358,7 @@ List getDetails(String body) {
     category_payment = text5?.group(0);
   }
   print("check");
-  // print(bank! +
-  //     upi_id! +
-  //     date!rz +
-  //     " " +
-  //     reference_number! +
-  //     "   " +
-  //     amount! +
-  //     " " +
-  //     category_payment!);
 
-  //print(bank! + "lol");
   return [bank, date, upi_id, reference_number, amount, category_payment];
 }
 
