@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../components/sms_module.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/services.dart';
 
 ValueNotifier<double> monthlyExpenditureValue = ValueNotifier(-1);
 
@@ -19,6 +20,8 @@ class PriceShowerState extends State<PriceShower> with WidgetsBindingObserver {
   final db = FirebaseFirestore.instance;
 
   String username = "User";
+
+  List<Map<String, dynamic>> expenseData = [];
 
   double budget = -1;
 
@@ -40,6 +43,27 @@ class PriceShowerState extends State<PriceShower> with WidgetsBindingObserver {
         budget = docData['budget'];
       });
     });
+
+    // getting the expense data
+
+    //     db
+    //     .collection('/users')
+    //     .doc(FirebaseAuth.instance.currentUser?.email)
+    //     .collection('expenseList')
+    //     .get()
+    //     .then((QuerySnapshot snapshot) {
+    //   for (int i = 0; i < snapshot.docs.length; i++) {
+    //     final docData = snapshot.docs[i].data() as Map<String, dynamic>;
+
+    //     final paymentTo;
+    //     final amountPaid;
+
+    //     paymentTo = docData['upiId'];
+    //     amountPaid = docData['amountPaid'];
+
+    //     expenseData.add({'paymentTo': })
+    //   }
+    // });
   }
 
   @override

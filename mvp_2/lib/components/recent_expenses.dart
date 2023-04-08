@@ -5,11 +5,15 @@ import 'dart:ffi';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'expenses_shower.dart';
+
+//ValueNotifier<List<Map<String, dynamic>>> expenseList = ValueNotifier([]);
+List<Map<String, dynamic>> expenseList = [];
 
 String topText = "";
 String bottomText = "";
-double topCost = -1;
-double bottomCost = -1;
+double topCost = 0;
+double bottomCost = 0;
 
 /* Recent Expenses Widget */
 
@@ -23,30 +27,50 @@ class RecentExpenses extends StatefulWidget {
 class _RecentExpensesState extends State<RecentExpenses>
     with WidgetsBindingObserver {
   final FirebaseFirestore db = FirebaseFirestore.instance;
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+
+    expenseList = [];
+    topText = "";
+    bottomText = "";
+    topCost = 0;
+    bottomCost = 0;
 
     final userRef =
         db.collection('/users').doc(FirebaseAuth.instance.currentUser?.email);
 
     final query = userRef
         .collection('expenseList')
-        .orderBy('timeOfPayment', descending: true)
-        .limit(2);
+        .orderBy('timeOfPayment', descending: true);
 
     query.get().then((QuerySnapshot snapshot) {
-      final firstData = snapshot.docs.first.data() as Map<String, dynamic>;
-      final secondData = snapshot.docs.last.data() as Map<String, dynamic>;
+      if (snapshot.size >= 1) {
+        final firstData = snapshot.docs.first.data() as Map<String, dynamic>;
+        setState(() {
+          topText = firstData['upiId'];
+          topCost = firstData['amountPaid'].toDouble();
+        });
+      }
 
-      setState(() {
-        topText = firstData['upiId'];
-        bottomText = secondData['upiId'];
+      if (snapshot.size >= 2) {
+        final secondData = snapshot.docs[1].data() as Map<String, dynamic>;
 
-        topCost = firstData['amountPaid'].toDouble();
-        bottomCost = secondData['amountPaid'].toDouble();
-      });
+        setState(() {
+          bottomText = secondData['upiId'];
+          bottomCost = secondData['amountPaid'].toDouble();
+        });
+      }
+      for (int i = 0; i < snapshot.size; i++) {
+        final docData = snapshot.docs[i].data() as Map<String, dynamic>;
+
+        expenseList.add({
+          'paymentTo': docData['upiId'],
+          'amountPaid': docData['amountPaid']
+        });
+      }
     });
   }
 
@@ -60,25 +84,41 @@ class _RecentExpensesState extends State<RecentExpenses>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
+      // making the expense list empty again
+      expenseList = [];
+
       final userRef =
           db.collection('/users').doc(FirebaseAuth.instance.currentUser?.email);
 
       final query = userRef
           .collection('expenseList')
-          .orderBy('timeOfPayment', descending: true)
-          .limit(2);
+          .orderBy('timeOfPayment', descending: true);
 
       query.get().then((QuerySnapshot snapshot) {
-        final firstData = snapshot.docs.first.data() as Map<String, dynamic>;
-        final secondData = snapshot.docs.last.data() as Map<String, dynamic>;
+        if (snapshot.size >= 1) {
+          final firstData = snapshot.docs.first.data() as Map<String, dynamic>;
+          setState(() {
+            topText = firstData['upiId'];
+            topCost = firstData['amountPaid'].toDouble();
+          });
+        }
 
-        setState(() {
-          topText = firstData['upiId'];
-          bottomText = secondData['upiId'];
+        if (snapshot.size >= 2) {
+          final secondData = snapshot.docs[1].data() as Map<String, dynamic>;
 
-          topCost = firstData['amountPaid'].toDouble();
-          bottomCost = secondData['amountPaid'].toDouble();
-        });
+          setState(() {
+            bottomText = secondData['upiId'];
+            bottomCost = secondData['amountPaid'].toDouble();
+          });
+        }
+        for (int i = 0; i < snapshot.size; i++) {
+          final docData = snapshot.docs[i].data() as Map<String, dynamic>;
+
+          expenseList.add({
+            'paymentTo': docData['upiId'],
+            'amountPaid': docData['amountPaid']
+          });
+        }
       });
     }
   }
@@ -118,20 +158,20 @@ class _RecentExpensesState extends State<RecentExpenses>
                       Container(
                           child: Row(
                         children: [
-                          Container(child: Icon(Icons.local_pizza, size: 35)),
+                          Container(child: Icon(Icons.wallet, size: 30)),
                           Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 16),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(topText, style: TextStyle(fontSize: 17)),
-                                Padding(
-                                  padding:
-                                      const EdgeInsets.symmetric(vertical: 2.5),
-                                  child: Text("Food",
-                                      style: TextStyle(
-                                          color: Colors.grey, fontSize: 12)),
-                                )
+                                Text(topText, style: TextStyle(fontSize: 15)),
+                                // Padding(
+                                //   padding:
+                                //       const EdgeInsets.symmetric(vertical: 2.5),
+                                //   child: Text("Food",
+                                //       style: TextStyle(
+                                //           color: Colors.grey, fontSize: 12)),
+                                // )
                               ],
                             ),
                           )
@@ -163,21 +203,21 @@ class _RecentExpensesState extends State<RecentExpenses>
                       Container(
                           child: Row(
                         children: [
-                          Container(child: Icon(Icons.local_pizza, size: 35)),
+                          Container(child: Icon(Icons.wallet, size: 30)),
                           Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 16),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(bottomText,
-                                    style: TextStyle(fontSize: 17)),
-                                Padding(
-                                  padding:
-                                      const EdgeInsets.symmetric(vertical: 2.5),
-                                  child: Text("Food",
-                                      style: TextStyle(
-                                          color: Colors.grey, fontSize: 12)),
-                                )
+                                    style: TextStyle(fontSize: 15)),
+                                // Padding(
+                                //   padding:
+                                //       const EdgeInsets.symmetric(vertical: 2.5),
+                                //   child: Text("Food",
+                                //       style: TextStyle(
+                                //           color: Colors.grey, fontSize: 12)),
+                                // )
                               ],
                             ),
                           )
@@ -205,7 +245,12 @@ class _RecentExpensesState extends State<RecentExpenses>
                     textStyle: const TextStyle(
                         fontSize: 15, color: Color.fromRGBO(15, 33, 61, 1)),
                   ),
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const ExpenseShower()));
+                  },
                   child: Text("See More"),
                 ),
               )

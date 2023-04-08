@@ -117,18 +117,18 @@ class _SignupScreenState extends State<SignupScreen> {
           .collection('/users')
           .doc(FirebaseAuth.instance.currentUser?.email)
           .set(user)
-          .then(((value) => print("Value written successfully")))
-          .onError((error, stackTrace) => print("Error : $error"));
+          .then(((value) {
+        print("User onboarded successfully");
 
-      db
-          .collection('/users')
-          .doc(FirebaseAuth.instance.currentUser?.email)
-          .collection('/categoryExpenseList');
-
-      db
-          .collection('/users')
-          .doc(FirebaseAuth.instance.currentUser?.email)
-          .collection('/expenseList');
+        // db
+        //     .collection('/users')
+        //     .doc(FirebaseAuth.instance.currentUser?.email)
+        //     .collection('/expenseList')
+        //     .doc()
+        //     .set({});
+      })).onError((error, stackTrace) {
+        print("Error: $error");
+      });
     });
   }
 }

@@ -9,6 +9,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'price_shower.dart';
 import '../screens/home_screen.dart';
+import 'recent_expenses.dart';
 
 final db = FirebaseFirestore.instance;
 double monthlyExpenditure = -1;
@@ -185,8 +186,11 @@ onBackgroundMessage(SmsMessage message) async {
       .collection('/expenseList')
       .doc()
       .set(transactionData)
-      .then((value) => print("transaction data pushed"))
-      .onError((error, stackTrace) => print("Error: $error"));
+      .then((value) {
+    print("transaction data pushed");
+  });
+
+  // reminder too put onerror
 
   db
       .collection('/users')
