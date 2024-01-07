@@ -1,8 +1,6 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
 
 import 'package:flutter/material.dart';
-//import 'package:mvp_2/components/set_budget.dart';
-import '../components/sms_module.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/services.dart';
@@ -25,45 +23,51 @@ class PriceShowerState extends State<PriceShower> with WidgetsBindingObserver {
 
   double budget = -1;
 
+  int index = -1;
+
   void initState() {
     super.initState();
 
     WidgetsBinding.instance.addObserver(this);
 
-    db
-        .collection('/users')
-        .doc(FirebaseAuth.instance.currentUser?.email)
-        .get()
-        .then((DocumentSnapshot snapshot) {
-      final docData = snapshot.data() as Map<String, dynamic>;
+    final userRef =
+        db.collection('/users').doc(FirebaseAuth.instance.currentUser?.email);
+
+    userRef.get().then((DocumentSnapshot docSnap) {
+      final docData = docSnap.data() as Map<String, dynamic>;
+
+      index = docSnap['indexList'];
 
       setState(() {
-        monthlyExpenditureValue.value = docData['monthlyExpenses'];
+        debugPrint("calling setState code foor username and budget");
         username = docData['name'].toString();
         budget = docData['budget'];
       });
+
+      if (index > 0) {
+        debugPrint("calling index>0 code");
+        userRef
+            .collection('/monthlyExpenses')
+            .where('indexNum', isEqualTo: index)
+            .get()
+            .then((QuerySnapshot querySnapshot) {
+          final docData = querySnapshot.docs[0].data() as Map<String, dynamic>;
+
+          debugPrint(
+              "The docdata monthly expense is ${docData['monthlyExpense']}");
+
+          setState(() {
+            monthlyExpenditureValue.value = docData['monthlyExpense'];
+          });
+        }).onError((error, stackTrace) {
+          debugPrint("Error: $error");
+        });
+      } else {
+        setState(() {
+          monthlyExpenditureValue.value = 0;
+        });
+      }
     });
-
-    // getting the expense data
-
-    //     db
-    //     .collection('/users')
-    //     .doc(FirebaseAuth.instance.currentUser?.email)
-    //     .collection('expenseList')
-    //     .get()
-    //     .then((QuerySnapshot snapshot) {
-    //   for (int i = 0; i < snapshot.docs.length; i++) {
-    //     final docData = snapshot.docs[i].data() as Map<String, dynamic>;
-
-    //     final paymentTo;
-    //     final amountPaid;
-
-    //     paymentTo = docData['upiId'];
-    //     amountPaid = docData['amountPaid'];
-
-    //     expenseData.add({'paymentTo': })
-    //   }
-    // });
   }
 
   @override
@@ -77,15 +81,26 @@ class PriceShowerState extends State<PriceShower> with WidgetsBindingObserver {
     if (state == AppLifecycleState.resumed) {
       // making a call to the database when we resume app to update monthly expenses and the like
 
-      db
-          .collection('/users')
-          .doc(FirebaseAuth.instance.currentUser?.email)
-          .get()
-          .then((DocumentSnapshot snapshot) {
-        final existingData = snapshot.data() as Map<String, dynamic>;
+      final userRef =
+          db.collection('/users').doc(FirebaseAuth.instance.currentUser?.email);
 
-        monthlyExpenditureValue.value =
-            existingData['monthlyExpenses'].toDouble();
+      userRef.get().then((DocumentSnapshot docSnap) {
+        final docData = docSnap.data() as Map<String, dynamic>;
+
+        index = docData['indexList'];
+        userRef
+            .collection('/monthlyExpenses')
+            .where('indexNum', isEqualTo: index)
+            .get()
+            .then((QuerySnapshot querySnap) {
+          debugPrint("Query size is ${querySnap.size}");
+          final existingData = querySnap.docs[0].data() as Map<String, dynamic>;
+          debugPrint(existingData['month']);
+          monthlyExpenditureValue.value =
+              existingData['monthlyExpense'].toDouble();
+
+          setState(() {});
+        });
       });
     }
   }
@@ -116,7 +131,7 @@ class PriceShowerState extends State<PriceShower> with WidgetsBindingObserver {
                   children: [
                     Text("Hi $username!",
                         style: TextStyle(
-                            color: Color.fromARGB(255, 216, 216, 216),
+                            color: Color.fromARGB(255, 255, 255, 255),
                             fontSize: 17.5,
                             fontWeight: FontWeight.bold,
                             letterSpacing: 1)),
@@ -125,7 +140,7 @@ class PriceShowerState extends State<PriceShower> with WidgetsBindingObserver {
                         FirebaseAuth.instance.signOut();
                       },
                       child: Icon(Icons.logout,
-                          color: Color.fromARGB(255, 213, 213, 213), size: 30),
+                          color: Color.fromARGB(255, 255, 255, 255), size: 30),
                     )
                   ],
                 ),
@@ -134,12 +149,12 @@ class PriceShowerState extends State<PriceShower> with WidgetsBindingObserver {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   SizedBox(
-                    height: 200,
-                    width: 200,
+                    height: 250,
+                    width: 250,
                     child: Stack(fit: StackFit.expand, children: [
                       CircularProgressIndicator(
                           color: Color.fromRGBO(255, 255, 255, 0.8),
-                          backgroundColor: Color.fromARGB(255, 255, 239, 155),
+                          backgroundColor: Color.fromARGB(255, 255, 227, 86),
                           //value: 0.15,
                           value: 1 - (monthlyExpenditureValue.value / budget),
                           strokeWidth: 10),

@@ -37,11 +37,11 @@ class _SetBudgetState extends State<SetBudget> {
     setState(() {
       budgetUpdateText = "Budget Updated Successfully";
 
-      Timer(const Duration(milliseconds: 2000), () {
-        setState(() {
-          budgetUpdateText = "";
-        });
-      });
+      // Timer(const Duration(milliseconds: 2000), () {
+      //   setState(() {
+      //     budgetUpdateText = "";
+      //   });
+      // });
     });
 
     // update budget data on firestore

@@ -1,15 +1,27 @@
 import 'dart:ffi';
 
 import 'package:flutter/material.dart';
-import 'package:mvp_2/components/expense_analyse.dart';
 import 'dart:async';
 import 'package:telephony/telephony.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'price_shower.dart';
-import '../screens/home_screen.dart';
-import 'recent_expenses.dart';
+
+final monthList = [
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December'
+];
 
 final db = FirebaseFirestore.instance;
 double monthlyExpenditure = -1;
@@ -23,235 +35,206 @@ class SmsModule extends StatefulWidget {
 
 class SmsModuleState extends State<SmsModule> {
   late String _message;
+
   final telephony = Telephony.instance;
   final db = FirebaseFirestore.instance;
 
-  // _SmsModuleState({this.UpdateState(12)});
-  // final UpdateCallback UpdateState;
+  onMessage(SmsMessage message) async {}
 
-  onMessage(SmsMessage message) async {
-    print("on message called");
-    List details = getDetails(message.body ?? "Error");
-    String bank, date, upi_id, reference_number, amount, category_payment;
-
-    bank = details[0];
-    date = details[1];
-    upi_id = details[2];
-    reference_number = details[3];
-    amount = details[4];
-    category_payment = details[5];
-
-    double dAmount = double.parse(amount);
-
-    // Firebase database update code
-    final transactionData = <String, dynamic>{
-      'timeOfPayment': DateTime.now().millisecondsSinceEpoch,
-      'bank': bank,
-      'date': date,
-      'upiId': upi_id,
-      'refNum': reference_number,
-      'amountPaid': dAmount,
-      'paymentCategory': category_payment
-    };
-
-    double? currentAmount;
-
-    db
-        .collection('/users')
-        .doc(FirebaseAuth.instance.currentUser?.email)
-        .collection('/expenseList')
-        .doc()
-        .set(transactionData)
-        .then((value) => print("transaction data pushed"))
-        .onError((error, stackTrace) => print("Error: $error"));
-
-    db
-        .collection('/users')
-        .doc(FirebaseAuth.instance.currentUser?.email)
-        .collection('categoryExpenseList')
-        .doc('food')
-        .get()
-        .then((DocumentSnapshot snapshot) {
-      if (snapshot.exists) {
-        print("The category exists");
-        final existingData = snapshot.data() as Map<String, dynamic>;
-
-        double newTotalAmount =
-            existingData['totalAmount'].toDouble() + dAmount;
-
-        db
-            .collection('/users')
-            .doc(FirebaseAuth.instance.currentUser?.email)
-            .collection('categoryExpenseList')
-            .doc('food')
-            .update({'totalAmount': newTotalAmount}).then((value) {
-          costMapping.value['food'] = newTotalAmount;
-          costMapping.notifyListeners();
-        });
-      } else {
-        db
-            .collection('/users')
-            .doc(FirebaseAuth.instance.currentUser?.email)
-            .collection(('categoryExpenseList'))
-            .doc('food')
-            .set({'totalAmount': dAmount}).then((value) {
-          print("Category payment has been set for the first time");
-          costMapping.value['food'] = dAmount;
-          costMapping.notifyListeners();
-        });
-      }
-    });
-
-    db
-        .collection('/users')
-        .doc(FirebaseAuth.instance.currentUser?.email)
-        .get()
-        .then((DocumentSnapshot snapshot) {
-      final existingData = snapshot.data() as Map<String, dynamic>;
-
-      double currentWeeklyAmount =
-          existingData['weeklyExpenses'].toDouble() + dAmount;
-      double currentMonthlyAmount =
-          existingData['monthlyExpenses'].toDouble() + dAmount;
-
-      db
-          .collection('/users')
-          .doc(FirebaseAuth.instance.currentUser?.email)
-          .update({
-        'weeklyExpenses': currentWeeklyAmount,
-        'monthlyExpenses': currentMonthlyAmount
-      }).then((value) {
-        print("Updated new amount");
-        monthlyExpenditureValue.value = currentMonthlyAmount;
-      });
-    });
-  }
-
-  Future<void> initPlatformState() async {
-    // Platform messages may fail, so we use a try/catch PlatformException.
-    // If the widget was removed from the tree while the asynchronous platform
-    // message was in flight, we want to discard the reply rather than calling
-    // setState to update our non-existent appearance.
-
+  void initPlatformState() async {
     final bool? result = await telephony.requestPhoneAndSmsPermissions;
-
     if (result != null && result) {
-      print("if true");
+      debugPrint("Requested Permissions");
+
       telephony.listenIncomingSms(
           onNewMessage: onMessage, onBackgroundMessage: onBackgroundMessage);
     } else {
-      print("if  false");
+      debugPrint("Permissions Not given for Phone and SMS");
     }
 
     if (!mounted) return;
   }
 
   @override
-  Widget build(BuildContext context) {
+  void initState() {
+    super.initState();
     initPlatformState();
+  }
 
+  @override
+  Widget build(BuildContext context) {
     return SizedBox.shrink();
   }
 }
 
-onBackgroundMessage(SmsMessage message) async {
+@pragma('vm:entry-point')
+void onBackgroundMessage(SmsMessage message) async {
   await Firebase.initializeApp();
 
   debugPrint("onBackgroundMessage called");
+
   List details = getDetails(message.body ?? "Error");
-  String bank, date, upi_id, reference_number, amount, category_payment;
+
+  String bank, date, upiId, referenceNumber, amount, categoryPayment;
+
+  for (int i = 0; i < details.length; i++) {
+    debugPrint("item $i ${details[i]}");
+  }
+
   bank = details[0];
-  date = details[1];
-  upi_id = details[2];
-  reference_number = details[3];
+  upiId = details[2];
+  referenceNumber = details[3];
   amount = details[4];
-  category_payment = details[5];
+  categoryPayment = details[5];
 
   double dAmount = double.parse(amount);
 
+  DateTime currentTime = DateTime.now();
+
+  final userRef =
+      db.collection('/users').doc(FirebaseAuth.instance.currentUser?.email);
+
+  // setting a default index value before I update
+  int index = -1;
+
   // Firebase database update code
   final transactionData = <String, dynamic>{
-    'timeOfPayment': DateTime.now().millisecondsSinceEpoch,
+    'timeOfPayment': currentTime.millisecondsSinceEpoch,
     'bank': bank,
-    'date': date,
-    'upiId': upi_id,
-    'refNum': reference_number,
+    'upiId': upiId,
+    'refNum': referenceNumber,
     'amountPaid': dAmount,
-    'paymentCategory': category_payment
+    'paymentCategory': categoryPayment,
+    'day': currentTime.day,
   };
 
-  db
-      .collection('/users')
-      .doc(FirebaseAuth.instance.currentUser?.email)
-      .collection('/expenseList')
-      .doc()
-      .set(transactionData)
-      .then((value) {
-    print("transaction data pushed");
-  });
+  // Code to get index
+  userRef.get().then((DocumentSnapshot snapshot) {
+    final docData = snapshot.data() as Map<String, dynamic>;
 
-  // reminder too put onerror
+    index = docData['indexList'];
 
-  db
-      .collection('/users')
-      .doc(FirebaseAuth.instance.currentUser?.email)
-      .get()
-      .then((DocumentSnapshot snapshot) {
-    final existingData = snapshot.data() as Map<String, dynamic>;
+    if (index == 0) {
+      userRef.update({'indexList': 1});
+      final monthData = <String, dynamic>{
+        'monthlyExpense': 0.0,
+        'indexNum': 1,
+        'month': monthList[currentTime.month - 1],
+        'year': currentTime.year
+      };
 
-    double currentWeeklyAmount =
-        existingData['weeklyExpenses'].toDouble() + dAmount;
-    double currentMonthlyAmount =
-        existingData['monthlyExpenses'].toDouble() + dAmount;
+      userRef
+          .collection('/monthlyExpenses')
+          .doc(
+              '${currentTime.year.toString()}_${monthList[currentTime.month - 1].toString()}')
+          .set(monthData)
+          .then((value) {
+        index = 1;
+        userRef
+            .collection('/monthlyExpenses')
+            .where('indexNum', isEqualTo: index)
+            .get()
+            .then((QuerySnapshot querySnap) {
+          querySnap.docs[0].reference
+              .collection('/monthExpenseDocuments')
+              .doc()
+              .set(transactionData)
+              .then((value) => debugPrint("Transaction data has been pushed"))
+              .onError((error, stackTrace) => debugPrint("Error: $error"));
 
-    db
-        .collection('/users')
-        .doc(FirebaseAuth.instance.currentUser?.email)
-        .update({
-      'weeklyExpenses': currentWeeklyAmount,
-      'monthlyExpenses': currentMonthlyAmount
-    }).then((value) {
-      print("updated new amount");
-      print(currentMonthlyAmount);
-      monthlyExpenditureValue.value = currentMonthlyAmount;
-      print(monthlyExpenditureValue.value);
-    });
-  });
+          final existingData = querySnap.docs[0].data() as Map<String, dynamic>;
+          double currentMonthlyAmount =
+              existingData['monthlyExpense'].toDouble() + dAmount;
 
-  db
-      .collection('/users')
-      .doc(FirebaseAuth.instance.currentUser?.email)
-      .collection('categoryExpenseList')
-      .doc('food')
-      .get()
-      .then((DocumentSnapshot snapshot) {
-    if (snapshot.exists) {
-      print("The category exists");
-      final existingData = snapshot.data() as Map<String, dynamic>;
+          querySnap.docs[0].reference
+              .update({'monthlyExpense': currentMonthlyAmount}).then((value) {
+            debugPrint("updated new monthly expenses amount");
+            debugPrint(currentMonthlyAmount.toString());
 
-      double newTotalAmount = existingData['totalAmount'].toDouble() + dAmount;
-
-      db
-          .collection('/users')
-          .doc(FirebaseAuth.instance.currentUser?.email)
-          .collection('categoryExpenseList')
-          .doc('food')
-          .update({'totalAmount': newTotalAmount}).then((value) {
-        costMapping.value['food'] = newTotalAmount;
-        costMapping.notifyListeners();
+            monthlyExpenditureValue.value = currentMonthlyAmount;
+            debugPrint(monthlyExpenditureValue.value.toString());
+          }).onError((error, stackTrace) {
+            debugPrint("Error: $error");
+          });
+        });
+      }).onError((error, stackTrace) {
+        debugPrint("Error: $error");
       });
     } else {
-      db
-          .collection('/users')
-          .doc(FirebaseAuth.instance.currentUser?.email)
-          .collection(('categoryExpenseList'))
-          .doc('food')
-          .set({'totalAmount': dAmount}).then((value) {
-        print("Category payment has been set for the first time");
-        costMapping.value['food'] = dAmount;
-        costMapping.notifyListeners();
+      debugPrint("After else statement index value is $index");
+
+      userRef
+          .collection('/monthlyExpenses')
+          .where('indexNum', isEqualTo: index)
+          .get()
+          .then((QuerySnapshot snapshot) {
+        if (snapshot.docs[0].id !=
+            "${currentTime.year.toString()}_${monthList[currentTime.month - 1].toString()}") {
+          // set new index and make a new document with a new ID
+          index += 1;
+          userRef
+              .update({'indexList': index})
+              .then((value) => debugPrint("IndexList index updated"))
+              .onError((error, stackTrace) => debugPrint("Error: $error"));
+
+          final monthData = <String, dynamic>{
+            'monthlyExpense': transactionData['monthlyExpense'],
+            'indexNum': index,
+            'month': monthList[currentTime.month - 1],
+            'year': currentTime.year
+          };
+
+          userRef
+              .collection('/monthlyExpenses')
+              .doc(
+                  '${currentTime.year.toString()}_${monthList[currentTime.month - 1].toString()}')
+              .set(monthData)
+              .then((value) {
+            debugPrint("Created a new doc and set its index data");
+
+            userRef
+                .collection('/monthlyExpenses')
+                .where('indexNum', isEqualTo: index)
+                .get()
+                .then((QuerySnapshot querySnap) {
+              querySnap.docs[0].reference
+                  .collection('/monthExpenseDocuments')
+                  .doc()
+                  .set(transactionData)
+                  .then(
+                      (value) => debugPrint("Transaction data has been pushed"))
+                  .onError((error, stackTrace) => debugPrint("Error: $error"));
+            });
+          }).onError((error, stackTrace) {
+            debugPrint("error: $error");
+          });
+        } else {
+          snapshot.docs[0].reference
+              .collection('/monthExpenseDocuments')
+              .doc()
+              .set(transactionData)
+              .then((value) => debugPrint("Transaction data has been pushed"))
+              .onError((error, stackTrace) => debugPrint("Error: $error"));
+        }
+
+        final existingData = snapshot.docs[0].data() as Map<String, dynamic>;
+        double currentMonthlyAmount =
+            existingData['monthlyExpense'].toDouble() + dAmount;
+
+        snapshot.docs[0].reference
+            .update({'monthlyExpense': currentMonthlyAmount}).then((value) {
+          debugPrint("updated new monthly expenses amount");
+          debugPrint(currentMonthlyAmount.toString());
+
+          monthlyExpenditureValue.value = currentMonthlyAmount;
+          debugPrint(monthlyExpenditureValue.value.toString());
+        }).onError((error, stackTrace) {
+          debugPrint("Error: $error");
+        });
       });
     }
+  }).onError((error, stackTrace) {
+    debugPrint("Error lmaobamba: $error");
   });
 }
 
@@ -311,13 +294,13 @@ List getDetails(String body) {
       upi_id = matches.elementAt(1)[0]!;
     }
 
-    RegExp regex4 = RegExp(r'Ref No [0-9]*');
+    RegExp regex4 = RegExp(r'Refno [0-9]*');
     RegExpMatch? text3 = regex4.firstMatch(body);
-    reference_number = text3?.group(0)?.split(" ").elementAt(2);
+    reference_number = text3?.group(0)?.split(" ").elementAt(1);
 
-    RegExp regex5 = RegExp(r'Rs[0-9]*.[0-9]*');
+    RegExp regex5 = RegExp(r'[0-9]*\.[0-9]*');
     RegExpMatch? text4 = regex5.firstMatch(body);
-    amount = text4?.group(0)?.split("Rs").elementAt(1);
+    amount = text4?.group(0);
 
     RegExp regex6 = RegExp(r'credited|debited');
     RegExpMatch? text5 = regex6.firstMatch(body);

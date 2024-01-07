@@ -1,11 +1,12 @@
 // ignore_for_file: prefer_const_constructors
+import 'dart:isolate';
+
 import 'package:mvp_2/components/sms_module.dart';
 import 'package:flutter/material.dart';
 import 'package:mvp_2/screens/login_screen.dart';
 import 'package:mvp_2/screens/signup_screen.dart';
 import './screens/home_screen.dart';
 import 'dart:async';
-import 'package:telephony/telephony.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 

@@ -6,12 +6,19 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'expenses_shower.dart';
+import 'package:intl/intl.dart';
 
 //ValueNotifier<List<Map<String, dynamic>>> expenseList = ValueNotifier([]);
 List<Map<String, dynamic>> expenseList = [];
+Map<int, List<Map<String, dynamic>>> monthExpenseList = {};
+Map<int, List<dynamic>> indexMonth = {};
 
 String topText = "";
 String bottomText = "";
+String topDate = "";
+String bottomDate = "";
+String topTime = "";
+String bottomTime = "";
 double topCost = 0;
 double bottomCost = 0;
 
@@ -33,44 +40,112 @@ class _RecentExpensesState extends State<RecentExpenses>
     super.initState();
     WidgetsBinding.instance.addObserver(this);
 
+    monthExpenseList = {};
     expenseList = [];
+    indexMonth = {};
     topText = "";
     bottomText = "";
+    topTime = "";
+    bottomTime = "";
+    topDate = "";
+    bottomDate = "";
     topCost = 0;
     bottomCost = 0;
 
     final userRef =
         db.collection('/users').doc(FirebaseAuth.instance.currentUser?.email);
 
-    final query = userRef
-        .collection('expenseList')
-        .orderBy('timeOfPayment', descending: true);
+    userRef.get().then((DocumentSnapshot docSnap) {
+      // two cases, if the indexed month has 1 payment, or 2 payments
+      // if one payment, then
+      // if this is index = 1, then just display one payment, else just add the recent most payment
+      // in the previous month if that exists
 
-    query.get().then((QuerySnapshot snapshot) {
-      if (snapshot.size >= 1) {
-        final firstData = snapshot.docs.first.data() as Map<String, dynamic>;
-        setState(() {
-          topText = firstData['upiId'];
-          topCost = firstData['amountPaid'].toDouble();
-        });
-      }
+      userRef
+          .collection('/monthlyExpenses')
+          .orderBy('indexNum', descending: true)
+          .get()
+          .then((QuerySnapshot querySnap) {
+        if (querySnap.size > 0) {
+          // for (var queryDoc in querySnap.docs) {
+          debugPrint("The size of the querySnap is ${querySnap.size}");
+          for (int j = 0; j < querySnap.docs.length; j++) {
+            var queryDoc = querySnap.docs[j];
 
-      if (snapshot.size >= 2) {
-        final secondData = snapshot.docs[1].data() as Map<String, dynamic>;
+            String currentMonth = querySnap.docs[j]['month'];
+            int currentYear = querySnap.docs[j]['year'];
 
-        setState(() {
-          bottomText = secondData['upiId'];
-          bottomCost = secondData['amountPaid'].toDouble();
-        });
-      }
-      for (int i = 0; i < snapshot.size; i++) {
-        final docData = snapshot.docs[i].data() as Map<String, dynamic>;
+            // updating index month map list
+            indexMonth[j + 1] = [];
+            indexMonth[j + 1]!.add(querySnap.docs[j]['month']);
+            indexMonth[j + 1]!.add(querySnap.docs[j]['year']);
 
-        expenseList.add({
-          'paymentTo': docData['upiId'],
-          'amountPaid': docData['amountPaid']
-        });
-      }
+            queryDoc.reference
+                .collection('/monthExpenseDocuments')
+                .orderBy('timeOfPayment', descending: true)
+                .get()
+                .then((QuerySnapshot queryExpenseSnap) {
+              if (j == 0) {
+                if (queryExpenseSnap.size >= 2) {
+                  final firstData =
+                      queryExpenseSnap.docs[0].data() as Map<String, dynamic>;
+
+                  final secondData =
+                      queryExpenseSnap.docs[1].data() as Map<String, dynamic>;
+
+                  setState(() {
+                    topText = firstData['upiId'];
+                    topCost = firstData['amountPaid'].toDouble();
+                    topDate = "${firstData['day']} $currentMonth $currentYear";
+                    topTime = DateFormat('hh:mm a').format(
+                        DateTime.fromMillisecondsSinceEpoch(
+                            firstData['timeOfPayment']));
+
+                    bottomText = secondData['upiId'];
+                    bottomCost = secondData['amountPaid'].toDouble();
+                    bottomDate =
+                        "${secondData['day']} $currentMonth $currentYear";
+                    bottomTime = DateFormat('hh:mm a').format(
+                        DateTime.fromMillisecondsSinceEpoch(
+                            secondData['timeOfPayment']));
+                  });
+                } else if (queryExpenseSnap.size == 1) {
+                  final firstData =
+                      queryExpenseSnap.docs[0].data() as Map<String, dynamic>;
+
+                  setState(() {
+                    topText = firstData['upiId'];
+                    topCost = firstData['amountPaid'].toDouble();
+                    topDate = topDate =
+                        "${firstData['day']} $currentMonth $currentYear";
+                    topTime = DateFormat('hh:mm a').format(
+                        DateTime.fromMillisecondsSinceEpoch(
+                            firstData['timeOfPayment']));
+                  });
+                }
+              }
+
+              for (int i = 0; i < queryExpenseSnap.size; i++) {
+                final docData =
+                    queryExpenseSnap.docs[i].data() as Map<String, dynamic>;
+
+                if (!monthExpenseList.containsKey(j + 1)) {
+                  monthExpenseList[j + 1] = [];
+                }
+                monthExpenseList[j + 1]?.add({
+                  'paymentTo': docData['upiId'],
+                  'amountPaid': docData['amountPaid'],
+                  'timeOfPayment': docData['timeOfPayment'],
+                  'day': docData['day']
+                });
+              }
+
+              debugPrint(
+                  "The month expense list is ${monthExpenseList.length}");
+            });
+          }
+        }
+      });
     });
   }
 
@@ -84,41 +159,102 @@ class _RecentExpensesState extends State<RecentExpenses>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      // making the expense list empty again
-      expenseList = [];
+      // making the local lists empty
+      monthExpenseList = {};
+      indexMonth = {};
 
       final userRef =
           db.collection('/users').doc(FirebaseAuth.instance.currentUser?.email);
 
-      final query = userRef
-          .collection('expenseList')
-          .orderBy('timeOfPayment', descending: true);
+      userRef.get().then((DocumentSnapshot docSnap) {
+        // two cases, if the indexed month has 1 payment, or 2 payments
+        // if one payment, then
+        // if this is index = 1, then just display one payment, else just add the recent most payment
+        // in the previous month if that exists
 
-      query.get().then((QuerySnapshot snapshot) {
-        if (snapshot.size >= 1) {
-          final firstData = snapshot.docs.first.data() as Map<String, dynamic>;
-          setState(() {
-            topText = firstData['upiId'];
-            topCost = firstData['amountPaid'].toDouble();
-          });
-        }
+        userRef
+            .collection('/monthlyExpenses')
+            .orderBy('indexNum', descending: true)
+            .get()
+            .then((QuerySnapshot querySnap) {
+          if (querySnap.size > 0) {
+            debugPrint("The size of the querySnap is ${querySnap.size}");
+            for (int j = 0; j < querySnap.docs.length; j++) {
+              var queryDoc = querySnap.docs[j];
 
-        if (snapshot.size >= 2) {
-          final secondData = snapshot.docs[1].data() as Map<String, dynamic>;
+              String currentMonth = querySnap.docs[j]['month'];
+              int currentYear = querySnap.docs[j]['year'];
 
-          setState(() {
-            bottomText = secondData['upiId'];
-            bottomCost = secondData['amountPaid'].toDouble();
-          });
-        }
-        for (int i = 0; i < snapshot.size; i++) {
-          final docData = snapshot.docs[i].data() as Map<String, dynamic>;
+              // updating index month map list
+              indexMonth[j + 1] = [currentMonth, currentYear];
 
-          expenseList.add({
-            'paymentTo': docData['upiId'],
-            'amountPaid': docData['amountPaid']
-          });
-        }
+              queryDoc.reference
+                  .collection('/monthExpenseDocuments')
+                  .orderBy('timeOfPayment', descending: true)
+                  .get()
+                  .then((QuerySnapshot queryExpenseSnap) {
+                if (j == 0) {
+                  if (queryExpenseSnap.size >= 2) {
+                    final firstData =
+                        queryExpenseSnap.docs[0].data() as Map<String, dynamic>;
+
+                    final secondData =
+                        queryExpenseSnap.docs[1].data() as Map<String, dynamic>;
+
+                    setState(() {
+                      topText = firstData['upiId'];
+                      topCost = firstData['amountPaid'].toDouble();
+                      topDate =
+                          "${firstData['day']} $currentMonth $currentYear";
+                      topTime = DateFormat('hh:mm a').format(
+                          DateTime.fromMillisecondsSinceEpoch(
+                              firstData['timeOfPayment']));
+
+                      bottomText = secondData['upiId'];
+                      bottomCost = secondData['amountPaid'].toDouble();
+                      bottomDate =
+                          "${secondData['day']} $currentMonth $currentYear";
+                      bottomTime = DateFormat('hh:mm a').format(
+                          DateTime.fromMillisecondsSinceEpoch(
+                              secondData['timeOfPayment']));
+                    });
+                  } else if (queryExpenseSnap.size == 1) {
+                    final firstData =
+                        queryExpenseSnap.docs[0].data() as Map<String, dynamic>;
+
+                    setState(() {
+                      topText = firstData['upiId'];
+                      topCost = firstData['amountPaid'].toDouble();
+                      topDate =
+                          "${firstData['day']} $currentMonth $currentYear";
+                      topTime = DateFormat('hh:mm a').format(
+                          DateTime.fromMillisecondsSinceEpoch(
+                              firstData['timeOfPayment']));
+                    });
+                  }
+                }
+
+                for (int i = 0; i < queryExpenseSnap.size; i++) {
+                  final docData =
+                      queryExpenseSnap.docs[i].data() as Map<String, dynamic>;
+
+                  if (!monthExpenseList.containsKey(j + 1)) {
+                    monthExpenseList[j + 1] = [];
+                  }
+                  monthExpenseList[j + 1]?.add({
+                    'paymentTo': docData['upiId'],
+                    'amountPaid': docData['amountPaid'],
+                    'timeOfPayment': docData['timeOfPayment'],
+                    'day': docData['day']
+                  });
+                }
+
+                debugPrint(
+                    "The month expense list is ${monthExpenseList.length}");
+              });
+            }
+          }
+        });
       });
     }
   }
@@ -164,14 +300,23 @@ class _RecentExpensesState extends State<RecentExpenses>
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(topText, style: TextStyle(fontSize: 15)),
-                                // Padding(
-                                //   padding:
-                                //       const EdgeInsets.symmetric(vertical: 2.5),
-                                //   child: Text("Food",
-                                //       style: TextStyle(
-                                //           color: Colors.grey, fontSize: 12)),
-                                // )
+                                Text(topText.trim(),
+                                    style: TextStyle(fontSize: 15)),
+                                Row(
+                                  children: [
+                                    Text(topDate,
+                                        style: TextStyle(
+                                            fontSize: 12,
+                                            color: const Color.fromARGB(
+                                                255, 132, 132, 132))),
+                                    SizedBox(width: 5),
+                                    Text(topTime,
+                                        style: TextStyle(
+                                            fontSize: 12,
+                                            color: const Color.fromARGB(
+                                                255, 132, 132, 132))),
+                                  ],
+                                ),
                               ],
                             ),
                           )
@@ -192,6 +337,7 @@ class _RecentExpensesState extends State<RecentExpenses>
                   ),
                 )),
               ),
+              SizedBox(height: 5),
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 5),
                 child: Container(
@@ -209,15 +355,23 @@ class _RecentExpensesState extends State<RecentExpenses>
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(bottomText,
+                                Text(bottomText.trim(),
                                     style: TextStyle(fontSize: 15)),
-                                // Padding(
-                                //   padding:
-                                //       const EdgeInsets.symmetric(vertical: 2.5),
-                                //   child: Text("Food",
-                                //       style: TextStyle(
-                                //           color: Colors.grey, fontSize: 12)),
-                                // )
+                                Row(
+                                  children: [
+                                    Text(bottomDate,
+                                        style: TextStyle(
+                                            fontSize: 12,
+                                            color: const Color.fromARGB(
+                                                255, 132, 132, 132))),
+                                    SizedBox(width: 5),
+                                    Text(bottomTime,
+                                        style: TextStyle(
+                                            fontSize: 12,
+                                            color: const Color.fromARGB(
+                                                255, 132, 132, 132))),
+                                  ],
+                                )
                               ],
                             ),
                           )

@@ -110,7 +110,8 @@ class _SignupScreenState extends State<SignupScreen> {
         'name': nameController.text.trim(),
         'monthlyExpenses': 0.0,
         'weeklyExpenses': 0.0,
-        'budget': 3000.0
+        'budget': 3000.0,
+        'indexList': 0
       };
 
       db
@@ -119,13 +120,6 @@ class _SignupScreenState extends State<SignupScreen> {
           .set(user)
           .then(((value) {
         print("User onboarded successfully");
-
-        // db
-        //     .collection('/users')
-        //     .doc(FirebaseAuth.instance.currentUser?.email)
-        //     .collection('/expenseList')
-        //     .doc()
-        //     .set({});
       })).onError((error, stackTrace) {
         print("Error: $error");
       });
