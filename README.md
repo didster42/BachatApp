@@ -9,9 +9,7 @@ Bachat is an application which keeps track of your UPI payments by parsing the t
 
 1.  ******************************************************************Automatic UPI Payment Tracking -******************************************************************  Aggregates your UPI payments as they are made, reducing manual work needed to track expenses.
 2.  **********************************Budget Setting -**********************************  Set a budget and use the intuitive UI to see how much of your budget you have spent this month.
-3.  ************************************Expense Viewing -***********************************
-
-*  Have a look at the date and time at which you made your expenses.
+3.  ************************************Expense Viewing -*********************************** Have a look at the date and time at which you made your expenses.
 
 
 ## Screenshots
